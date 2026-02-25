@@ -112,21 +112,9 @@ RUN wget https://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk
     cd asterisk-13.38.3 && \
     # Criar usuário asterisk
     useradd -r -d /var/lib/asterisk -s /sbin/nologin asterisk || true && \
-    # Contrib scripts
-    contrib/scripts/install_prereq install && \
-    # Configurar
+    # Configurar sem usar install_prereq (que precisa de aptitude)
     ./configure --with-jansson --with-pjproject-bundled && \
-    # Selecionar módulos
-    make menuselect.makeopts && \
-    menuselect/menuselect --enable res_config_mysql menuselect.makeopts && \
-    menuselect/menuselect --enable format_mp3 menuselect.makeopts && \
-    menuselect/menuselect --enable app_confbridge menuselect.makeopts && \
-    menuselect/menuselect --enable app_page menuselect.makeopts && \
-    menuselect/menuselect --enable codec_opus menuselect.makeopts && \
-    menuselect/menuselect --enable codec_silk menuselect.makeopts && \
-    # Baixar MP3
-    contrib/scripts/get_mp3_source.sh || true && \
-    # Compilar e instalar
+    # Compilar e instalar (sem menuselect interativo)
     make && make install && make samples && make config && \
     ldconfig && \
     cd .. && rm -rf asterisk-13.38.3*
