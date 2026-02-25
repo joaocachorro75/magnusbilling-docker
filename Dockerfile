@@ -102,14 +102,9 @@ RUN sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
 
 WORKDIR /usr/src
 
-# Jansson (JSON library para Asterisk)
-RUN wget http://www.digip.org/jansson/releases/jansson-2.14.tar.gz && \
-    tar -xzf jansson-2.14.tar.gz && \
-    cd jansson-2.14 && \
-    ./configure --prefix=/usr && \
-    make && make install && \
-    ldconfig && \
-    cd .. && rm -rf jansson-2.14*
+# Jansson (JSON library para Asterisk) - instalar via apt
+RUN apt-get update && apt-get install -y libjansson-dev libjansson4 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Asterisk 13 (LTS)
 RUN wget https://downloads.asterisk.org/pub/telephony/asterisk/releases/asterisk-13.38.3.tar.gz && \
