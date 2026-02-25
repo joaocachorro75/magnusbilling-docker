@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  magnusbilling:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: magnusbilling7:latest
+    container_name: magnusbilling
+    restart: unless-stopped
+    
+    # Privilégios necessários para Asterisk
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    
+    # Network mode host para VoIP funcionar corretamente
+    # IMPORTANTE: Para produção, use network_mode: host
+    # network_mode: host
+    
+    ports:
+      # HTTP/HTTPS
+      - "80:80"
+      - "443:443"
+      
+      # SIP UDP
+      - "5060:5060/udp"
+      # SIP TCP
+      - "5060:5060/tcp"
+      
+      # AMI (Asterisk Manager Interface)
+      - "5038:5038/tcp"
+      
+      # IAX2 (opcional)
+      - "4569:4569/udp"
+      
+      # RTP (Áudio) - Range de portas
+      - "10000-20000:10000-20000/udp"
+    
+    environment:
+      # Timezone
+      - TZ=America/Belem
+      
+      # MySQL
+      - MYSQL_ROOT_PASSWORD=magnus123
+      - MYSQL_DATABASE=mbilling
+      - MYSQL_USER=mbilling
+      - MYSQL_PASSWORD=mbilling123
+      
+      # Asterisk AMI
+      - AMI_PASSWORD=magnus123
+    
+    volumes:
+      # Persistência do banco
+      - mysql_data:/var/lib/mysql
+      
+      # Logs do Asterisk
+      - asterisk_logs:/var/log/asterisk
+      
+      # Configurações do Asterisk
+      - asterisk_config:/etc/asterisk
+      
+      # Runtime do MagnusBilling
+      - mbilling_runtime:/var/www/html/mbilling/protected/runtime
+      
+      # Gravações (se houver)
+      - asterisk_spool:/var/spool/asterisk
+
+volumes:
+  mysql_data:
+  asterisk_logs:
+  asterisk_config:
+  mbilling_runtime:
+  asterisk_spool:
