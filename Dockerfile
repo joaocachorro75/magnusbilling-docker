@@ -79,6 +79,8 @@ RUN apt-get update && apt-get install -y \
     unixodbc-dev \
     odbcinst \
     libodbc1 \
+    uuid-dev \
+    libedit-dev \
     # Utilitários
     cron \
     rsyslog \
