@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     git \
     subversion \
+    composer \
     # Apache + PHP
     apache2 \
     libapache2-mod-php \
@@ -173,27 +174,16 @@ exten => s,n,Hangup()' > /etc/asterisk/extensions.conf
 
 WORKDIR /var/www/html
 
-# Baixar MagnusBilling
-RUN wget --no-check-certificate https://magnusbilling.org/download/MagnusBilling-current.tar.gz -O mb.tar.gz && \
-    tar -xzf mb.tar.gz && \
-    rm mb.tar.gz && \
-    mv MagnusBilling-* mbilling 2>/dev/null || true && \
-    # Se o tar não tiver subpasta
-    [ -d "mbilling" ] || mkdir -p mbilling && \
-    chown -R www-data:www-data mbilling && \
-    chmod -R 755 mbilling
-
-# Criar diretórios necessários
-RUN mkdir -p /var/www/html/mbilling/protected/runtime \
-             /var/www/html/mbilling/assets \
-             /var/www/html/mbilling/tmp \
-             /var/www/html/mbilling/resources/reports \
-             /var/www/html/mbilling/resources/images && \
-    chown -R www-data:www-data /var/www/html/mbilling/protected/runtime \
-                                /var/www/html/mbilling/assets \
-                                /var/www/html/mbilling/tmp \
-                                /var/www/html/mbilling/resources/reports \
-                                /var/www/html/mbilling/resources/images
+# Baixar MagnusBilling do repositório oficial
+RUN git clone --depth 1 https://github.com/magnussolution/magnusbilling7.git mbilling && \
+    cd mbilling && \
+    # Instalar dependências PHP do MagnusBilling
+    composer install --no-dev --optimize-autoloader 2>/dev/null || true && \
+    # Criar diretórios necessários
+    mkdir -p protected/runtime assets tmp resources/reports resources/images && \
+    # Permissões
+    chown -R www-data:www-data /var/www/html/mbilling && \
+    chmod -R 775 protected/runtime assets tmp resources/reports resources/images
 
 # ============================================================
 # APACHE CONFIG
